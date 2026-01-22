@@ -9,37 +9,9 @@ from flask import Flask, g, request, session, render_template
 from flask_session import Session
 
 threads = {}
-
 logger = logging.getLogger()
-
 config = configparser.ConfigParser()
 config.read('config')
-
-client_id = config.get(section = 'Spotify', option = 'client_id', fallback = os.environ.get('CLIENT_ID'))
-client_secret = config.get(section = 'Spotify', option = 'client_secret', fallback = os.environ.get('CLIENT_SECRET'))
-redirect_uri = config.get(section = 'Spotify', option = 'redirect_uri', fallback = 'http://127.0.0.1:8080')
-scope = config.get(section = 'Spotify', option = 'scope', fallback = 'playlist-modify-public, playlist-modify-private, user-read-email')
-dnp_file = config.get(section = 'General', option = 'dnp_file', fallback = 'FIRST-Do-Not-Play-List-2025.xlsx')
-remove_optional = config.getboolean(section = 'General', option = 'remove_optional', fallback = False)
-remove_explicit = config.getboolean(section = 'General', option = 'remove_explicit', fallback = True)
-make_public = config.getboolean(section = 'General', option = 'make_public', fallback = True)
-enable_log = config.getboolean(section = 'General', option = 'enable_log', fallback = True)
-log_file = config.get(section = 'General', option = 'log_file', fallback = 'cleaner.log')
-log_level = config.get(section = 'General', option = 'log_level', fallback = 'INFO')
-
-match log_level:
-    case 'DEBUG':
-        real_log_level = logging.DEBUG
-    case 'INFO':
-        real_log_level = logging.INFO
-    case 'WARNING':
-        real_log_level = logging.WARNING
-    case 'ERROR':
-        real_log_level = logging.ERROR
-    case 'CRITICAL':
-        real_log_level = logging.CRITICAL
-    case _:
-        real_log_level = logging.INFO
 
 def _chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
@@ -327,10 +299,39 @@ if enable_log:
     logger.debug('  log_file = ' + log_file)
     logger.debug('  log_level = ' + log_level)
 
+client_id = config.get(section = 'Spotify', option = 'client_id', fallback = os.getenv('CLIENT_ID', default=None))
+client_secret = config.get(section = 'Spotify', option = 'client_secret', fallback = os.getenv('CLIENT_SECRET', default=None))
+redirect_uri = config.get(section = 'Spotify', option = 'redirect_uri', fallback = os.getenv('REDIRECT_URI', default=None))
+scope = config.get(section = 'Spotify', option = 'scope', fallback = 'playlist-modify-public, playlist-modify-private, user-read-email')
+dnp_file = config.get(section = 'General', option = 'dnp_file', fallback = 'FIRST-Do-Not-Play-List-2025.xlsx')
+remove_optional = config.getboolean(section = 'General', option = 'remove_optional', fallback = False)
+remove_explicit = config.getboolean(section = 'General', option = 'remove_explicit', fallback = True)
+make_public = config.getboolean(section = 'General', option = 'make_public', fallback = True)
+enable_log = config.getboolean(section = 'General', option = 'enable_log', fallback = True)
+log_file = config.get(section = 'General', option = 'log_file', fallback = 'cleaner.log')
+log_level = config.get(section = 'General', option = 'log_level', fallback = os.getenv('LOG_LEVEL', default='INFO'))
+
+match log_level:
+    case 'DEBUG':
+        real_log_level = logging.DEBUG
+    case 'INFO':
+        real_log_level = logging.INFO
+    case 'WARNING':
+        real_log_level = logging.WARNING
+    case 'ERROR':
+        real_log_level = logging.ERROR
+    case 'CRITICAL':
+        real_log_level = logging.CRITICAL
+    case _:
+        real_log_level = logging.INFO
+
 # create and configure the app
 app = Flask(__name__, instance_relative_config=True)
 app.config['SECRET_KEY'] = os.urandom(64)
 app.config['SESSION_TYPE'] = 'cachelib'
+app.config['SERVER_NAME'] = os.getenv('SERVER_NAME', default='127.0.0.1:8080')
+app.config['APPLICATION_ROOT'] = os.getenv('APPLICATION_ROOT', default='/')
+app.config['PREFERRED_URL_SCHEME'] = os.getenv('SCHEME', default='http')
 Session(app)
 
 # ensure the instance folder exists
