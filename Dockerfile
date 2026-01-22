@@ -9,4 +9,4 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 COPY /app /app
 
 ENTRYPOINT ["python3"]
-CMD ["-m", "flask", "run", "--debug"]
+CMD ["-m", "flask", "run", "--debug", "--host=0.0.0.0"]
