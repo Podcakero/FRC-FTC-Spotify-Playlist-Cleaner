@@ -1,4 +1,4 @@
-FROM python:alpine AS builder
+FROM python:3.10-alpine AS builder
 
 WORKDIR /app
 
@@ -8,4 +8,5 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 COPY /app /app
 
-ENTRYPOINT ["flask run --debug"]
+ENTRYPOINT ["python3"]
+CMD ["-m", "flask", "run", "--debug"]
