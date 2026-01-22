@@ -1,7 +1,6 @@
+import os
 import pandas
-import secrets
 import streamlit as st
-import time
 import toml
 
 from streamlit.components.v1 import iframe
@@ -27,7 +26,7 @@ def get_auth_manager():
     """
     Returns a spotipy.oauth2.SpotifyOAuth object.
     """
-    return SpotifyOAuth(**config["spotipy"], cache_handler=StreamlitCacheHandler())
+    return SpotifyOAuth(client_id=os.getenv('SPOTIPY_CLIENT_ID, config['Spotipy'].get('client_id', "")), client_secret=os.getenv('SPOTIPY_CLIENT_SECRET', config['Spotipy'].get('client_secret', "")), **config["spotipy"], cache_handler=StreamlitCacheHandler())
 
 def _chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
