@@ -8,6 +8,4 @@ log_file = cleaner.log
 log_level = INFO
 
 [Spotify]
-client_id = 
-client_secret = 
 redirect_uri = http://127.0.0.1:8080
