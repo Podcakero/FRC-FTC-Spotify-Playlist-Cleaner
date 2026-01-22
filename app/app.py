@@ -2,7 +2,6 @@ import configparser
 import json
 import logging
 import os
-import re
 import spotipy
 import threading
 from openpyxl import load_workbook
@@ -16,8 +15,8 @@ logger = logging.getLogger()
 config = configparser.ConfigParser()
 config.read('config')
 
-client_id = config.get(section = 'Spotify', option = 'client_id', fallback = os.environ.get('CLIENT_ID', fallback = None))
-client_secret = config.get(section = 'Spotify', option = 'client_secret', fallback = os.environ.get('CLIENT_SECRET', fallback = None))
+client_id = config.get(section = 'Spotify', option = 'client_id', fallback = os.environ.get('CLIENT_ID'))
+client_secret = config.get(section = 'Spotify', option = 'client_secret', fallback = os.environ.get('CLIENT_SECRET'))
 redirect_uri = config.get(section = 'Spotify', option = 'redirect_uri', fallback = 'http://127.0.0.1:8080')
 scope = config.get(section = 'Spotify', option = 'scope', fallback = 'playlist-modify-public, playlist-modify-private, user-read-email')
 dnp_file = config.get(section = 'General', option = 'dnp_file', fallback = 'FIRST-Do-Not-Play-List-2025.xlsx')
