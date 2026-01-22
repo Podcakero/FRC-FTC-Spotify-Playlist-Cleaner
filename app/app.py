@@ -5,11 +5,10 @@ import os
 import spotipy
 import threading
 from openpyxl import load_workbook
-from flask import Flask, g, request, session, render_template
+from flask import Flask, redirect, request, session, render_template
 from flask_session import Session
 
 threads = {}
-logger = logging.getLogger()
 config = configparser.ConfigParser()
 config.read('config')
 
@@ -40,6 +39,7 @@ match log_level:
         real_log_level = logging.INFO
 
 if enable_log:
+    logger = logging.getLogger()
     logging.basicConfig(filename = log_file, level = real_log_level)
 
     logger.info('## FRC/FTC Spotify Playlist Cleaner ##')
@@ -57,12 +57,12 @@ if enable_log:
     logger.debug('  log_level = ' + log_level)
 
 # create and configure the app
-app = Flask(__name__, instance_relative_config=True)
+app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(64)
-app.config['SESSION_TYPE'] = 'cachelib'
-app.config['SERVER_NAME'] = os.getenv('SERVER_NAME', default='127.0.0.1:8080')
-app.config['APPLICATION_ROOT'] = os.getenv('APPLICATION_ROOT', default='/')
-app.config['PREFERRED_URL_SCHEME'] = os.getenv('SCHEME', default='http')
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_FILE_DIR'] = './.flask-session/'
+#app.config['APPLICATION_ROOT'] = os.getenv('APPLICATION_ROOT', default='/')
+#app.config['PREFERRED_URL_SCHEME'] = os.getenv('SCHEME', default='http')
 Session(app)
 
 def _chunks(lst, n):
@@ -343,21 +343,37 @@ except OSError:
 def index():
     global threads
 
+    cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
+    auth_manager = spotipy.oauth2.SpotifyOAuth(client_id=client_id,
+                                               client_secret=client_secret,
+                                               redirect_uri=redirect_uri,
+                                               scope=scope,
+                                               cache_handler=cache_handler,
+                                               show_dialog=True)
+    sp = spotipy.Spotify(auth_manager=auth_manager)
+
+    if request.args.get("code"):
+        # Step 2. Being redirected from Spotify auth page
+        auth_manager.get_access_token(request.args.get("code"))
+        return redirect('/')
+
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        # Step 1. Display sign in link when no token
+        auth_url = auth_manager.get_authorize_url()
+        return f'<h2><a href="{auth_url}">Sign in</a></h2>'
+
     if request.method == "POST":
-        cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
-        auth_manager = spotipy.oauth2.SpotifyOAuth(client_id=client_id,
-                                                client_secret=client_secret,
-                                                redirect_uri=redirect_uri,
-                                                scope=scope,
-                                                cache_handler=cache_handler,
-                                                show_dialog=True)
-        sp = spotipy.Spotify(auth_manager=auth_manager)
         user = sp.me()
         threads['clean_playlist'] = CleanPlaylistThread(user=user, url=request.form['playlist_url'], clean_playlist_name=request.form['clean_playlist_name'])
         threads['clean_playlist'].start()
 
         session.playlist_id = request.form['playlist_url'].rsplit('/', 1)[-1]
     return render_template('index.html')
+
+@app.route('/sign_out')
+def sign_out():
+    session.pop("token_info", None)
+    return redirect('/')
 
 @app.route('/progress')
 def progress():
@@ -382,4 +398,4 @@ def playlist_ids():
     return json.dumps(playlist_ids)
 
 if __name__ == '__main__':
-    app.run(threaded=True, host=os.getenv('HOST', default='127.0.0.1'), port=int(os.getenv('PORT', default='8080')))
+    app.run(threaded=True, port=int(os.getenv('PORT', default='8080')), debug=True)

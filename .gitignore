@@ -14,5 +14,7 @@ build/
 *.egg-info/
 
 flask_session/
+.flask-session/
 
 cleaner.log
+app/config
