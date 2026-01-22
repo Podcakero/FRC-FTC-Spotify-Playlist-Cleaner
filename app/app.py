@@ -15,7 +15,7 @@ config.read('config')
 
 client_id = config.get(section = 'Spotify', option = 'client_id', fallback = os.getenv('CLIENT_ID', default=None))
 client_secret = config.get(section = 'Spotify', option = 'client_secret', fallback = os.getenv('CLIENT_SECRET', default=None))
-redirect_uri = config.get(section = 'Spotify', option = 'redirect_uri', fallback = os.getenv('REDIRECT_URI', default=None))
+redirect_uri = config.get(section = 'Spotify', option = 'redirect_uri', fallback = os.getenv('REDIRECT_URI', default="http://127.0.0.1:8080"))
 scope = config.get(section = 'Spotify', option = 'scope', fallback = 'playlist-modify-public, playlist-modify-private, user-read-email')
 dnp_file = config.get(section = 'General', option = 'dnp_file', fallback = 'FIRST-Do-Not-Play-List-2025.xlsx')
 remove_optional = config.getboolean(section = 'General', option = 'remove_optional', fallback = False)
@@ -380,3 +380,6 @@ def playlist_ids():
          playlist_ids['clean_playlist_id'] = 0
 
     return json.dumps(playlist_ids)
+
+if __name__ == '__main__':
+    app.run(threaded=True, port=int(os.getenv('PORT', default='8080')))
