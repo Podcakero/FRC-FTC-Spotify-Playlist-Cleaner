@@ -26,7 +26,12 @@ def get_auth_manager():
     """
     Returns a spotipy.oauth2.SpotifyOAuth object.
     """
-    return SpotifyOAuth(client_id=os.getenv('SPOTIPY_CLIENT_ID', config['spotipy'].get('client_id', "")), client_secret=os.getenv('SPOTIPY_CLIENT_SECRET', config['spotipy'].get('client_secret', "")), **config["spotipy"], cache_handler=StreamlitCacheHandler())
+    return SpotifyOAuth(
+                        client_id=os.getenv('SPOTIPY_CLIENT_ID', config['spotipy'].get('client_id', "")), 
+                        client_secret=os.getenv('SPOTIPY_CLIENT_SECRET', config['spotipy'].get('client_secret', "")), 
+                        redirect_uri=os.getenv('SPOTIPY_REDIRECT_URI', config['spotipy'].get('redirect_uri', "http://127.0.0.1:5301")),
+                        **config["spotipy"], 
+                        cache_handler=StreamlitCacheHandler())
 
 def _chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
