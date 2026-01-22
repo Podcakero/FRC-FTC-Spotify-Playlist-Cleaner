@@ -136,10 +136,12 @@ class GetTracksFromPlaylistThread(threading.Thread):
         super().__init__()
 
     def run(self):
+        cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
         auth_manager = spotipy.oauth2.SpotifyOAuth(client_id=client_id,
                                                    client_secret=client_secret,
                                                    redirect_uri=redirect_uri,
                                                    scope=scope,
+                                                   cache_handler=cache_handler,
                                                    show_dialog=True)
         sp = spotipy.Spotify(auth_manager=auth_manager)
 
@@ -231,10 +233,12 @@ class CreateCleanedPlaylistThread(threading.Thread):
         super().__init__()
 
     def run(self):
+        cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
         auth_manager = spotipy.oauth2.SpotifyOAuth(client_id=client_id,
                                                    client_secret=client_secret,
                                                    redirect_uri=redirect_uri,
                                                    scope=scope,
+                                                   cache_handler=cache_handler,
                                                    show_dialog=True)
         sp = spotipy.Spotify(auth_manager=auth_manager)
 
@@ -262,19 +266,21 @@ class CreateCleanedPlaylistThread(threading.Thread):
             self.progress = (float(counter) / float(len(self.tracks))) * 100.0
 
 class CleanPlaylistThread(threading.Thread):
-    def __init__(self, user, url, clean_playlist_name):
+    def __init__(self, user, url):
         self.user = user
         self.url = url
-        self.clean_playlist_name = clean_playlist_name
+        self.clean_playlist_name = ""
         self.clean_playlist = None
         self.progress = 0.0
         super().__init__()
     
     def run(self):
+        cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
         auth_manager = spotipy.oauth2.SpotifyOAuth(client_id=client_id,
                                                    client_secret=client_secret,
                                                    redirect_uri=redirect_uri,
                                                    scope=scope,
+                                                   cache_handler=cache_handler,
                                                    show_dialog=True)
         sp = spotipy.Spotify(auth_manager=auth_manager)
 
@@ -364,7 +370,7 @@ def index():
 
     if request.method == "POST":
         user = sp.me()
-        threads['clean_playlist'] = CleanPlaylistThread(user=user, url=request.form['playlist_url'], clean_playlist_name=request.form['clean_playlist_name'])
+        threads['clean_playlist'] = CleanPlaylistThread(user=user, url=request.form['playlist_url'])
         threads['clean_playlist'].start()
 
         session.playlist_id = request.form['playlist_url'].rsplit('/', 1)[-1]
