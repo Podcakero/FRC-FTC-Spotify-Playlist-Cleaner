@@ -60,20 +60,6 @@ def _chunks(lst, n):
 def _track_info(track_name, track_artist) -> str:
     return '\"' + track_name + '\" by \"' + track_artist + '\"'
 
-def _log_playlist(playlist) -> None:
-    logger.debug('Playlist Name: ' + playlist['name'])
-    logger.debug('Playlist Description: ' + playlist['description'])
-    if playlist['owner']['display_name'] is not None:
-        logger.debug('Playlist Owner Name: ' + playlist['owner']['display_name'])
-    logger.debug('Playlist Owner ID: ' + playlist['owner']['id'])
-    logger.debug('Playlist Owner URI: ' + playlist['owner']['uri'])
-    logger.debug('Playlist Owner URL: ' + playlist['owner']['external_urls']['spotify'])
-    logger.debug('Playlist is Public: ' + str(playlist['public']))
-    logger.debug('Playlist Size: ' + str(playlist['tracks']['total']))
-    logger.debug('Playlist ID: ' + playlist['id'])
-    logger.debug('Playlist URI: ' + playlist['uri'])
-    logger.debug('Playlist URL: ' + playlist['external_urls']['spotify'])
-
 def _search_for_track(track_name, track_artist, tracks) -> bool:
     skip = False
     logger.debug('Searching for Track \"' + track_name + '\" by \"' + track_artist + '\" in Do Not Play List.')
@@ -95,6 +81,20 @@ def _search_for_track(track_name, track_artist, tracks) -> bool:
             break
         logger.debug('Artist and Track combo not found in Do Not Play List. Searching the rest of the Do Not Play List')
     return skip
+
+def log_playlist(playlist) -> None:
+    logger.debug('Playlist Name: ' + playlist['name'])
+    logger.debug('Playlist Description: ' + playlist['description'])
+    if playlist['owner']['display_name'] is not None:
+        logger.debug('Playlist Owner Name: ' + playlist['owner']['display_name'])
+    logger.debug('Playlist Owner ID: ' + playlist['owner']['id'])
+    logger.debug('Playlist Owner URI: ' + playlist['owner']['uri'])
+    logger.debug('Playlist Owner URL: ' + playlist['owner']['external_urls']['spotify'])
+    logger.debug('Playlist is Public: ' + str(playlist['public']))
+    logger.debug('Playlist Size: ' + str(playlist['tracks']['total']))
+    logger.debug('Playlist ID: ' + playlist['id'])
+    logger.debug('Playlist URI: ' + playlist['uri'])
+    logger.debug('Playlist URL: ' + playlist['external_urls']['spotify'])
 
 def load_tracks_from_workbook(file = None, worksheet = 'DO NOT PLAY LIST') -> list:
     tracks = []

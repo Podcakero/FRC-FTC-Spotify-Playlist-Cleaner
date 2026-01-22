@@ -1,0 +1,15 @@
+[general]
+dnp_file = "FIRST-Do-Not-Play-List-2025.xlsx"
+remove_optional = false
+remove_explicit = true
+make_public = true
+enable_log = true
+log_file = "cleaner.log"
+log_level = "INFO"
+
+[spotipy]
+client_id = "890e514215d14c75b53e7322f6ecbb88"
+client_secret = "2a10914a876743e5aca564917e3fe0b5"
+redirect_uri = "http://127.0.0.1:8501"
+scope = "playlist-modify-public, playlist-modify-private, user-read-email"
+show_dialog = false
