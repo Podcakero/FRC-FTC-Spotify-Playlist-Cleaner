@@ -8,5 +8,4 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 COPY /app /app
 
-ENTRYPOINT ["python3"]
-CMD ["app.py"]
+ENTRYPOINT ["flask run --debug"]
