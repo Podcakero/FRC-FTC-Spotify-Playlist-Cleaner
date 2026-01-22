@@ -176,9 +176,9 @@ def main():
                         st.write("Creating Cleaned Playlist...")
                         name = unclean_playlist['name'] + " Cleaned"
                         description = "Playlist cleaned for use in FRC/FTC Events by the FRC-FTC Spotify Playlist Cleaner. " + unclean_playlist['description']
-                    #    clean_playlist_empty = sp.user_playlist_create(user = user['id'], name = name, public = make_public, description = description)
+                        clean_playlist_empty = sp.user_playlist_create(user = user['id'], name = name, public = make_public, description = description)
                         st.write("Filling Playlist")
-                    #    clean_playlist = create_cleaned_playlist(clean_playlist_empty, clean_tracks)
+                        clean_playlist = create_cleaned_playlist(clean_playlist_empty, clean_tracks)
                         status.update(
                             label="Cleaned Playlist Created", state="complete", expanded=False
                         )
