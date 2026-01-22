@@ -382,4 +382,4 @@ def playlist_ids():
     return json.dumps(playlist_ids)
 
 if __name__ == '__main__':
-    app.run(threaded=True, port=int(os.getenv('PORT', default='8080')))
+    app.run(threaded=True, host=os.getenv('HOST', default='127.0.0.1'), port=int(os.getenv('PORT', default='8080')))
