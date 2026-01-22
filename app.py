@@ -29,7 +29,7 @@ def get_auth_manager():
     return SpotifyOAuth(
                         client_id=os.getenv('SPOTIPY_CLIENT_ID', config['spotipy'].get('client_id', "")), 
                         client_secret=os.getenv('SPOTIPY_CLIENT_SECRET', config['spotipy'].get('client_secret', "")), 
-                        redirect_uri=os.getenv('SPOTIPY_REDIRECT_URI', config['spotipy'].get('redirect_uri', "http://127.0.0.1:5301")),
+                        redirect_uri=os.getenv('SPOTIPY_REDIRECT_URI', config['spotipy'].get('redirect_uri', "http://127.0.0.1:8501")),
                         **config["spotipy"], 
                         cache_handler=StreamlitCacheHandler())
 
@@ -41,8 +41,9 @@ def _chunks(lst, n):
 def _track_info(track_name, track_artist) -> str:
     return '\"' + track_name + '\" by \"' + track_artist + '\"'
 
-def _search_for_track(track_name, track_artist, tracks) -> bool:
-    return tracks.get(track_name) == track_artist
+def _search_for_track(track_name, track_artist, tracks):
+    dnp_artist = tracks[1].get(track_name)
+    return str(dnp_artist) == track_artist
 
 def get_tracks_from_playlist(playlist_id = None, playlist_total = 0) -> list:
     sp = Spotify(auth_manager=get_auth_manager())
@@ -101,7 +102,7 @@ def create_cleaned_playlist(playlist = None, tracks = None) -> dict:
 
 @st.cache_data
 def download_do_not_play_list(url):
-    dnp= pandas.read_excel(url, sheet_name = None, index_col=2)
+    dnp= pandas.read_excel(url, sheet_name = None, index_col=2, header=None, skiprows=1)
     return dnp
 
 def main():
@@ -175,9 +176,9 @@ def main():
                         st.write("Creating Cleaned Playlist...")
                         name = unclean_playlist['name'] + " Cleaned"
                         description = "Playlist cleaned for use in FRC/FTC Events by the FRC-FTC Spotify Playlist Cleaner. " + unclean_playlist['description']
-                        clean_playlist_empty = sp.user_playlist_create(user = user['id'], name = name, public = make_public, description = description)
+                    #    clean_playlist_empty = sp.user_playlist_create(user = user['id'], name = name, public = make_public, description = description)
                         st.write("Filling Playlist")
-                        clean_playlist = create_cleaned_playlist(clean_playlist_empty, clean_tracks)
+                    #    clean_playlist = create_cleaned_playlist(clean_playlist_empty, clean_tracks)
                         status.update(
                             label="Cleaned Playlist Created", state="complete", expanded=False
                         )
