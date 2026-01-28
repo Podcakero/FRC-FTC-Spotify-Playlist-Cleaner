@@ -8,5 +8,4 @@ log_file = "cleaner.log"
 log_level = "INFO"
 
 [spotipy]
-scope = "playlist-modify-public, playlist-modify-private, user-read-email"
 show_dialog = false
