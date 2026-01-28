@@ -122,8 +122,6 @@ def playlist_diff(url, unclean_tracks):
     )
 
     result = pandas.merge(dnp, unclean_list, how="inner", on=["Artist", "Song Title"])
-    #optional_result = pandas.merge(optional_list, dnp_result, how="inner", on=["Artist", "Song Title"])
-    #result = pandas.merge(dnp_result, optional_result, how="inner", on=["Artist", "Song Title"])
 
     st.table(result)
 
