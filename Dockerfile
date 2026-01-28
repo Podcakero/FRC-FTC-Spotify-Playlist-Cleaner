@@ -7,6 +7,7 @@ RUN pip3 install -r requirements.txt
 
 COPY app.py app.py
 COPY config.toml.example config.toml
+COPY pages pages
 
 EXPOSE 8501
 
