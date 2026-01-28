@@ -107,7 +107,7 @@ def download_do_not_play_list(url):
     dnp= pandas.read_excel(url, sheet_name = None, index_col=2, header=None, skiprows=1)
     return dnp
 
-@st.dialog("Unclean Tracks", dismissible=False)
+@st.dialog("Unclean Tracks", on_dismiss="rerun")
 def playlist_diff(url, unclean_tracks):
     dnp_list = pandas.read_excel(url, sheet_name = "DO NOT PLAY LIST", index_col="Artist", names=["Year", "Artist", "Song Title", "Reason", "List"], usecols=["Artist", "Song Title", "Reason"])
     optional_list = pandas.read_excel(url, sheet_name = "Optional", index_col="Artist", names=["Year", "Artist", "Song Title", "Reason", "List", "Tempo"], usecols=["Artist", "Song Title", "Reason"])
@@ -139,7 +139,6 @@ def main():
             dnp_url = st.text_input("Do Not Play List", value="https://www.firstinspires.org/hubfs/events/FIRST-Do-Not-Play-List-2025.xlsx?hsLang=en", key="dnp_url", help="Like to an Excel Spreadsheet formatted the same as the FIRST Do Not Play List")
             remove_explicit = st.toggle("Remove Explicit Tracks", value=True, key="remove_explicit", help="These are tracks marked as Explicit for Profanity or Content")
             remove_optional = st.toggle("Remove Optional Tracks", value=False, key="remove_optional", help="These are tracks that are sad/downer songs, or otherwise slow tempo")
-            make_public = st.toggle("Create Public Playlist", value=True, key="create_public", help="Should the generate playlist be Public")
 
         user = sp.me()
 
@@ -203,7 +202,7 @@ def main():
                     st.write("Creating Cleaned Playlist...")
                     name = st.session_state.unclean_playlist['name'] + " Cleaned"
                     description = "Playlist cleaned for use in FRC/FTC Events by the FRC-FTC Spotify Playlist Cleaner. " + st.session_state.unclean_playlist['description']
-                    clean_playlist_empty = sp.user_playlist_create(user = user['id'], name = name, public = make_public, description = description)
+                    clean_playlist_empty = sp.user_playlist_create(user = user['id'], name = name, public = True, description = description)
                     st.write("Filling Playlist")
                     clean_playlist = create_cleaned_playlist(clean_playlist_empty, st.session_state.clean_tracks)
                     status.update(
