@@ -18,3 +18,5 @@ flask_session/
 
 cleaner.log
 app/config
+
+config.toml

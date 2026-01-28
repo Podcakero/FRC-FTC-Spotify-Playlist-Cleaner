@@ -8,8 +8,5 @@ log_file = "cleaner.log"
 log_level = "INFO"
 
 [spotipy]
-client_id = "890e514215d14c75b53e7322f6ecbb88"
-client_secret = "3b4b63f3f2974589a85782fe6017eb0b"
-redirect_url = "http://127.0.0.1:8501"
 scope = "playlist-modify-public, playlist-modify-private, user-read-email"
 show_dialog = false
