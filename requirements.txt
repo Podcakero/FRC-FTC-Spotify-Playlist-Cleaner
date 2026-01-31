@@ -3,3 +3,4 @@ pandas
 spotipy
 streamlit
 toml
+ytmusicapi
