@@ -1,4 +1,7 @@
 [general]
+admin_password = ""
+enable_spotify = true
+enable_youtube = true
 dnp_file = "FIRST-Do-Not-Play-List-2025.xlsx"
 remove_optional = false
 remove_explicit = true
@@ -7,5 +10,12 @@ enable_log = true
 log_file = "cleaner.log"
 log_level = "INFO"
 
-[spotipy]
-show_dialog = false
+[spotify]
+client_id = ""
+client_secret = ""
+redirect_url = "http://127.0.0.1:8501"
+scope = "playlist-modify-public, playlist-modify-private, user-read-email"
+
+[youtube]
+client_id = ""
+client_secret = ""
