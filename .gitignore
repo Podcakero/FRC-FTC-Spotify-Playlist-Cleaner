@@ -20,3 +20,5 @@ cleaner.log
 app/config
 
 config.toml
+
+oauth.json
