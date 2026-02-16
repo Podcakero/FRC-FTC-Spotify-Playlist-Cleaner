@@ -171,21 +171,38 @@ def playlist_diff(url, unclean_tracks, explicit_tracks):
     for track in unclean_tracks:
         tracks.append({"Artist": track['artists'][0]['name'], "Song Title": track['name'], "Link": track['external_urls']['spotify']})
 
-    # Create DataFrame from Unclean Tracks List
-    unclean_list = pandas.DataFrame(
-        tracks
-    )
+    result = pandas.DataFrame()
+    if len(tracks) > 0:
+        # Create DataFrame from Unclean Tracks List
+        unclean_list = pandas.DataFrame(
+            tracks
+        )
 
-    # Merge Unclean Tracks List with DNP DataFrame to get the Reason for why the Track was removed
-    result = pandas.merge(dnp, unclean_list, how="inner", on=["Artist", "Song Title"])
+        # Merge Unclean Tracks List with DNP DataFrame to get the Reason for why the Track was removed
+        result = pandas.merge(dnp, unclean_list, how="inner", on=["Artist", "Song Title"])
 
-    # Show Tracks that were marked as Unclean
-    st.table(result)
+        # Show Tracks that were marked as Unclean
+        st.table(result)
+    else:
+        st.write("No unclean tracks found!")
+
+    st.session_state.situational_playlists = st.toggle("Create situation-based Playlists")
 
     # Wait for User to approve of changes
     if st.button("Go!"):
         st.session_state.submit = True
         st.rerun()
+
+def generate_track_dataframe(unconverted_tracks):
+    tracks = []
+    for track in unconverted_tracks:
+        tracks.append({"Artist": track['artists'][0]['name'], "Song Title": track['name'], "Link": track['external_urls']['spotify'], "Explicit": track['explicit'], "URI": track['uri'], "ID": track['id']})
+
+    df = pandas.DataFrame(
+        tracks
+    )
+
+    return df
 
 def main():
     st.title("Playlist Cleaner", anchor=None)
@@ -214,7 +231,7 @@ def main():
             with st.container():
                 # Playlist URL Text Box
                 with st.form("playlist_form", enter_to_submit=True):
-                    st.text_input("Spotify Playlist URL", value="", key="unclean_playlist_url", help="URL to Spotify Playlist you wish to Clean")
+                    st.session_state.unclean_playlist_url = st.text_input("Spotify Playlist URL", value="", help="URL to Spotify Playlist you wish to Clean")
                     submitted = st.form_submit_button("Clean")
 
                 # Wait for user to submit Playlist URL
@@ -268,6 +285,76 @@ def main():
                     # Do not show the Playlist Diff until it has been generated
                     if "submit" not in st.session_state:
                         playlist_diff(dnp_url, st.session_state.unclean_tracks, st.session_state.explicit_tracks)
+        # User has requests Situation-based Playlists
+        elif st.session_state.situational_playlists and ("submit_situation" not in st.session_state or not st.session_state.submit_situation):
+            st.session_state.situations = st.text_input("Enter the different Situations, separated by a comma").split(',')
+            
+            st.session_state.df = generate_track_dataframe(st.session_state.clean_tracks)
+
+            for situation in st.session_state.situations:
+                st.session_state.df[situation] = False
+
+            columns = ["Artist", "Song Title", "Link"]
+            columns.extend(st.session_state.situations)
+
+            st.data_editor(
+                st.session_state.df, 
+                column_order=columns,
+                column_config={
+                    "Artist": st.column_config.TextColumn(
+                        disabled = True
+                    ),
+                    "Song Title": st.column_config.TextColumn(
+                        disabled = True
+                    ),
+                    'Link': st.column_config.LinkColumn(
+                        disabled = True,
+                        display_text = "Open in Spotify"
+                    )
+                }
+            )
+
+            # Wait for User to approve of changes
+            if st.button("Done!"):
+                st.session_state.submit_situation = True
+                st.rerun()
+            
+        # User has approved changes with Situational Playlists
+        elif "submit_situation" in st.session_state and st.session_state.submit_situation:
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                # Unclean Playlist
+                iframe("https://open.spotify.com/embed/playlist/" + st.session_state.unclean_playlist_url.rsplit('/', 1)[-1], height="100%")
+            with col2:
+                # Create Full Clean Playlist
+                with st.status("Generating Cleaned Playlist...", expanded=True) as status:
+                    st.write("Creating Cleaned Playlist...")
+                    name = st.session_state.unclean_playlist['name'] + " Cleaned"
+                    description = "Playlist cleaned for use in FRC/FTC Events by the FRC-FTC Spotify Playlist Cleaner. " + st.session_state.unclean_playlist['description']
+                    clean_playlist_empty = sp.user_playlist_create(user = user['id'], name = name, public = True, description = description)
+
+                    st.write("Filling Playlist")
+                    clean_playlist = create_cleaned_playlist(clean_playlist_empty, st.session_state.clean_tracks)
+                    status.update(
+                        label="Cleaned Playlist Created", state="complete", expanded=False
+                    )
+                with st.status("Separating Situations...", expanded=True) as status:
+                     for situation in st.session_state.situations:
+                        situation_df = st.session_state.df.loc[st.session_state.df[situation] == True]
+                        with st.status("Creating Playlist for " + str(situation) + "..." , expanded=True) as status:
+                            st.write("Creating Cleaned Playlist...")
+                            name = st.session_state.unclean_playlist['name'] + " Cleaned " + str(situation)
+                            description = "Playlist cleaned for use in FRC/FTC Events by the FRC-FTC Spotify Playlist Cleaner. " + st.session_state.unclean_playlist['description']
+                            clean_playlist_empty = sp.user_playlist_create(user = user['id'], name = name, public = True, description = description)
+
+                            st.write("Filling Playlist")
+                            clean_playlist = create_cleaned_playlist(clean_playlist_empty, situation_df.to_dict('records'))
+                            status.update(
+                                label="Cleaned Playlist Created", state="complete", expanded=False
+                            )
+            with col3:
+                # Clean Playlist
+                iframe("https://open.spotify.com/embed/playlist/" + clean_playlist['id'])
         # User has approved changes
         else:
             col1, col2, col3 = st.columns(3)
@@ -307,7 +394,6 @@ def spotify_callback():
             pass
     del st.query_params["code"]
     main()
-
 
 if __name__ == "__main__":
     if st.query_params.get("code"):

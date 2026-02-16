@@ -24,7 +24,7 @@ def get_config():
         [spotify]
         client_id = \"\"
         client_secret = \"\"
-        redirect_url = \"http://127.0.0.1:8501/spotify\"
+        redirect_url = \"http://127.0.0.1:8501\"
         scope = \"playlist-modify-public, playlist-modify-private, user-read-email\"
 
         [youtube]
