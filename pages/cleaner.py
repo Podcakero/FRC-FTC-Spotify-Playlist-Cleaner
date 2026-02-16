@@ -212,8 +212,8 @@ def main():
         sp = Spotify(auth_manager=get_auth_manager())
 
     # Initialize Youtube API
-    if os.getenv("ENABLE_YOUTUBE") or general_config['enable_youtube']:
-        ytmusic = YTMusic('oauth.json', oauth_credentials=OAuthCredentials(client_id=os.getenv("YOUTUBE_CLIENT_ID", youtube_config['client_id']), client_secret=os.getenv("YOUTUBE_CLIENT_SECRET", youtube_config['client_secret'])))
+    #if os.getenv("ENABLE_YOUTUBE") or general_config['enable_youtube']:
+    #    ytmusic = YTMusic('oauth.json', oauth_credentials=OAuthCredentials(client_id=os.getenv("YOUTUBE_CLIENT_ID", youtube_config['client_id']), client_secret=os.getenv("YOUTUBE_CLIENT_SECRET", youtube_config['client_secret'])))
 
     # Check if User has logged into Spotify API or Youtube API
     if "spotipy_token" in st.session_state:
